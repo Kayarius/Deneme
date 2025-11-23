@@ -1,7 +1,9 @@
 class Calculator {
-    constructor(previousOperandElement, currentOperandElement) {
+    constructor(previousOperandElement, currentOperandElement, memoryIndicatorElement) {
         this.previousOperandElement = previousOperandElement;
         this.currentOperandElement = currentOperandElement;
+        this.memoryIndicatorElement = memoryIndicatorElement;
+        this.memory = 0;
         this.clear();
     }
 
@@ -84,6 +86,41 @@ class Calculator {
         this.currentOperand = (current / 100).toString();
     }
 
+    memoryAdd() {
+        const current = parseFloat(this.currentOperand);
+        if (!isNaN(current)) {
+            this.memory += current;
+            this.updateMemoryIndicator();
+        }
+    }
+
+    memorySubtract() {
+        const current = parseFloat(this.currentOperand);
+        if (!isNaN(current)) {
+            this.memory -= current;
+            this.updateMemoryIndicator();
+        }
+    }
+
+    memoryRecall() {
+        if (this.memory !== 0) {
+            this.currentOperand = this.memory.toString();
+        }
+    }
+
+    memoryClear() {
+        this.memory = 0;
+        this.updateMemoryIndicator();
+    }
+
+    updateMemoryIndicator() {
+        if (this.memory !== 0) {
+            this.memoryIndicatorElement.textContent = `M: ${this.getDisplayNumber(this.memory)}`;
+        } else {
+            this.memoryIndicatorElement.textContent = '';
+        }
+    }
+
     getDisplayNumber(number) {
         const stringNumber = number.toString();
         const integerDigits = parseFloat(stringNumber.split('.')[0]);
@@ -119,8 +156,9 @@ class Calculator {
 // Elements
 const previousOperandElement = document.querySelector('.previous-operand');
 const currentOperandElement = document.querySelector('.current-operand');
+const memoryIndicatorElement = document.querySelector('.memory-indicator');
 
-const calculator = new Calculator(previousOperandElement, currentOperandElement);
+const calculator = new Calculator(previousOperandElement, currentOperandElement, memoryIndicatorElement);
 
 // Number buttons
 document.querySelectorAll('[data-number]').forEach(button => {
@@ -155,6 +193,30 @@ document.querySelectorAll('[data-action]').forEach(button => {
                 break;
             case 'equals':
                 calculator.compute();
+                break;
+        }
+
+        calculator.updateDisplay();
+    });
+});
+
+// Memory buttons
+document.querySelectorAll('[data-memory]').forEach(button => {
+    button.addEventListener('click', () => {
+        const memoryAction = button.dataset.memory;
+
+        switch(memoryAction) {
+            case 'add':
+                calculator.memoryAdd();
+                break;
+            case 'subtract':
+                calculator.memorySubtract();
+                break;
+            case 'recall':
+                calculator.memoryRecall();
+                break;
+            case 'clear':
+                calculator.memoryClear();
                 break;
         }
 
